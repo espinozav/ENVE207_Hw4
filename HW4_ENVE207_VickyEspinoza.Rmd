@@ -1,0 +1,572 @@
+---
+title: "HW#4:Stringr & Air Quality Data"
+author: "Vicky Espinoza"
+date: "Due March 07, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+##R Book: Chapter 11 - Strings with stringr Exercises {.tabset}
+<span style="color:red">1. Complete the tutorial steps for Strings from Chapter 14 in your R for Data Science text book http://r4ds.had.co.nz/strings.html. Answer all of the exercise questions in Chapter 14. Turn in your responses as R notebook file (.html) as a commit to your GitHub page. Turn in all of your functions as separate function (.R) files with intelligible titles as a commit to your GitHub page. </span>
+
+
+##String Basics {.tabset}
+<span style="color:blue">1. What is the difference between paste() and paste0()? What stringr function are they equivalent to? How do the functions differ in handling NA? </span>
+
+paste () converts arguments to character strings, and concatenates them with separation specified by sep. By default it separates strings by spaces. It coerces missing value characters to NA. 
+
+paste0() is more efficient than paste() at concantenating strings without spaces. NAs are taken as characters in the string. 
+
+<span style="color:blue">2. Difference between sep and collapse arguments to str_c().</span>
+
+sep is the element that separates every term in a string, whereas, collapse will return concatenated pairs as part of a single character vector with tuples separated by the string passed by collapse. 
+
+<span style="color:blue"> 3.str_length() and str_sub() to extract the middle character from a string. what will you do if the string has an even number of characters? </span>
+
+
+library(tidyverse)
+library(stringr)
+x <- c("abc", "abcd")
+y <- str_length(x)
+z <- ceiling(y / 2) 
+str_sub(x, z, z)
+
+
+When there are even number then the choice is arbituary and the ceiling or floor function is selected by the user in order to select the middle value. 
+
+<span style="color:blue"> 4. What does str_wrap() do? When might you want to use it? </span>
+
+This function wraps the text so that it fits within a certain width. Might want to use it when typing long strings of text.
+
+<span style="color:blue"> 5.What does str_trim() do? What's the opposite of str_trim()? </span>
+
+str_trim() trims the white space of a string and can specify the side that we want white space trimmed from, either left or right side as demonstrated below:
+
+```{r}
+library(tidyverse)
+library(stringr)
+str_trim(" Data! ")
+str_trim(" Data! ", side = "left")
+str_trim(" Data! ", side = "right")
+```
+
+The opposite of str_trim() is str_pad which adds characters to either side of the string. 
+```{r}
+library(tidyverse)
+library(stringr)
+str_pad("Data!",7, side = "both")
+str_pad("Data!",6, side = "right")
+str_pad("Data!",10, side = "left")
+```
+
+<span style="color:blue"> 6. Write a function that turns a vector c("a", "b", "c") into the string a, b, and c. Think carefully about what it should do if given a vector of length 0,1, or 2. </span>
+
+```{r}
+library(tidyverse)
+library(stringr)
+commasep <- function(x, sep = ", ", last = ", and ") {
+  if (length(x) > 1) {
+    str_c(str_c(x[-length(x)], collapse = sep),
+                x[length(x)],
+                sep = last)
+  } else {
+    x
+  }
+}
+commasep("a")
+commasep("data")
+commasep(c("data", "stats", "analysis"))
+```
+
+##Matching Patterns with Regular Expressions {.tabset}
+<span style="color:blue"> 1. Explain why each of these strings don't match a \: "\", "\\", "\\\".</span>
+
+"\": escapes the next character in a R string
+"\\": this creates a regular expression which will escape the next character in the string
+"\\\": first two backlashes of this resolves the backlash of the regular expression and the third backlash escapes the next character in the string. it's the escape of a character in a regular expression
+
+<span style="color:blue"> 2. How would you match the sequence "'\ ? </span>
+
+a <- "\"'\\"
+writeLines(a)
+str_view(a, "\\\"'\\\\")
+
+
+<span style="color:blue"> 3. What patterns will the regular expression \..\..\.. match? How would you represent it as a string? </span>
+
+This expression will match strings with patterns that have a dot followed by a character (repeated 3x). 
+
+To match it: 
+
+a <- ".a.b.c"
+writeLines(a)
+str_view(a, "\\..\\..\\..")
+
+
+
+##Anchors {.tabset}
+
+<span style="color:blue"> How would you match the literal string `"$^$"`? </span>
+
+
+string1 <- "$^$"
+writeLines(string1)
+str_view(string1, "\\$\\^\\$")
+
+
+
+<span style="color:blue"> Given the corpus of common words in stringr::words, create regular expressions that find all words that: </span>
+
+<span style="color:blue">a. Start with "y".</span>
+str_view(words, "^y", match = TRUE)
+
+<span style="color:blue">b. End with "X". </span>
+str_view(words, "x$", match = TRUE)
+
+<span style="color:blue">c.Are exactly three letters long.</span>
+str_view(words, "^\\w{3}$", match = TRUE)
+Note: This can also be done using str_length. 
+
+<span style="color:blue">d. Have seven letters or more.</span>
+str_view(words, "^\\w{7,}$", match = TRUE)
+
+##Character Classes and Alternatives 
+
+<span style="color:blue"> 1. Create regular expressions to find all words that:</span>
+
+<span style="color:blue"> a.Start with a vowel </span>
+str_view(words, "^[aeiouy]", match=T)
+
+<span style="color:blue"> b. Contain only consonants (matching non-vowels) </span>
+str_view(words, "^[^aeouiy]$", match = T)
+
+<span style="color:blue">c. End with `ed`, but not with `eed`</span>
+str_view(words, "[^e]ed$", match = T)
+
+<span style="color:blue">d. End with `ing` or `ize`</span>
+str_view(words, "ing$|ize$") 
+
+<span style="color:blue"> 2. Empirically verify the rule "i before e except after c." </span>
+str_view(words, "([^c]|)ei", match = T) # not always
+
+<span style="color:blue">3.Is "q" always followed by a "u"?</span>
+str_view(words, "q[^u]", match = T) 
+YES!
+
+4. Write a regular expression that matches a word if it;s probably written in British English, not American English.</span>
+str_view(words, "ize", match = T)
+american_british <- tibble::tribble(
+  ~American.English, ~British.English,
+            "color",         "colour",
+         "behavior",      "behaviour",
+          "theater",        "theatre",
+         "behavior",      "behaviour",
+            "meter",          "metre",
+         "organize",       "organise",
+         "traveled",      "travelled"
+  )
+
+str_view(american_british[[1]], "our$|re$|se$|lled")
+str_view(american_british[[2]], "our$|re$|se$|lled")
+
+<span style="color:blue"> Create a regular expression that will match telephone numbers as commonly written in your country.</span>
+
+phone_numbers <- tibble::tribble(
+                      ~phone_numbers,
+                    "(818) 257-1201",
+                    "(818)-257-1201",
+                      "818-257-1201",
+                          "257-1201",
+                          "257 1201", 
+                          "2571201")
+str_view(phone_numbers[[1]],"^\\(?\\d{3}\\)?[\\s|-](\\d{3}[\\s|-]{1}\\d{4}$|\\d{4}$)")
+
+##Repetition {.tabset}
+<span style="color:blue">1. Describe the equivalents of ?, +, * in {m,n} form.</span>
+?: {0,1}
++ : {1,}
+* : {0,}
+
+
+<span style="color:blue">2.Describe in words what these regular expressions match (read carefully to see if I'm using a regular expression or a string that defines a regular expression): </span>
+
+<span style="color:blue">a.^.*$</span>
+Matches any character from beginning of the string to the end of string. Matches any input. 
+
+<span style="color:blue">b."\\{.+\\}"</span>
+Matches a backlash, open curly bracket, any character, backlash and closed curly bracket.
+
+<span style="color:blue">c.\d{4}-\d{2}-\d{2}</span>
+Matches 4 digits, a dash, 2 digits, a dash, and 2 digits 
+
+<span style="color:blue">d."\\\\{4}"</span>
+Matches \\\\
+
+<span style="color:blue">3. Create regular expressions to find all the words that: </span>
+
+<span style="color:blue">a. Start with three consonants.</span>
+str_view(words, "^[^aeouiy]{3}", match = T)
+
+<span style="color:blue">b.Have 3+ vowels in a row </span>
+str_view(words, "[aeouiy]{3,}", match = T)
+
+<span style="color:blue">c.Have 2+ vowel-constant pairs in a row </span>
+str_view(words, "([aeouiy][^aeouiy]){2,}", match = T)
+
+
+<span style="color:blue">4. Solve the beginner regexp crosswords at https://regexcrossword.com/challenges/beginner </span>
+
+<span style="color:blue">1. Beatles </span>
+TOP:H,E 
+BOTTOM:L,P
+<span style="color:red">HELP </span>
+
+<span style="color:blue">2. Naughty </span>
+TOP:B,O
+BOTTOM:B,E
+<span style="color:red"> BOBE </span>
+
+<span style="color:blue">3. Ghost </span>
+TOP:O,O
+BOTTOM:O,O
+<span style="color:red"> OOOO </span>
+
+<span style="color:blue">4.Symbolism </span>
+TOP:*,*
+BOTTOM:/,/
+<span style="color:red"> **//  </span>
+
+<span style="color:blue">5. Airstrip One </span>
+TOP:1,9
+BOTTOM:8,4
+<span style="color:red"> 1894 </span>
+
+##Grouping and Backreferences {.tabset}
+<span style="color:blue">1. Describe, in words, what these expressions will match: </span>
+<span style="color:blue">1. (.)\1\1</span>
+Results in 3 characters 3 times in a row
+
+<span style="color:blue">2. "(.)(.)\\2\\1" <span>
+A pair of two characters followed by the same pair of characters in reverse order 
+
+<span style="color:blue">3.(..)\1 </span>
+Two characters repeated
+
+<span style="color:blue">4. "(.).\\1.\\1" <span>
+ A character (original) followed by any character, the original character, any other character, the original character
+
+<span style="color:blue">5. "(.)(.)(.).*\\3\\2\\1" <span>
+This matches 3 characters followed by 0+ characters (any kind) followed by the same three characters in reverse order. 
+
+<span style="color:blue">2.Construct regular expressions to match words that: </span>
+
+<span style="color:blue">Construct regular expressions to match words that: </span>
+
+<span style="color:blue">a.Start and end with the same character.</span>
+^(.).*\1$
+str_view(words, "^(.).*\\1$")
+
+<span style="color:blue">b.Contain a repeated pair of letters </span>
+"(..).*\\1"
+str_view(words, "(..).*\\1")
+
+<span style="color:blue">c.Contain one letter repeated in at least three places </span>
+"([a-z]).*\\1.*\\1"
+
+##Tools: Detect Matches {.tabset}
+<span style="color:blue">1.For each of the following challenges, try solving it by using both a single regular expression, and a combination of multiple str_detect() calls: </span>
+
+<span style="color:blue">a.Find all words that start or end with x.</span>
+
+```{r}
+start_with_x <- str_detect(words, "^x")
+end_with_x <- str_detect(words, "x$")
+words[start_with_x | end_with_x]
+```
+
+<span style="color:blue">b.Find all words that start with a vowel and end with a consonant.</span>
+```{r}
+str_subset(words, "^[aeiou].*[^aeiou]$") %>% head()
+start_with_vowel <- str_detect(words, "^[aeiou]")
+end_with_consonant <- str_detect(words, "[^aeiou]$")
+words[start_with_vowel & end_with_consonant] %>% head()
+```
+
+<span style="color:blue">c. Are there any words that contain at least one of each different vowel? </span> No there are no words that contain at least one of each different vowel. 
+```{r}
+library(stringr)
+words[str_detect(words, "a") &
+        str_detect(words, "e") &
+        str_detect(words, "i") &
+        str_detect(words, "o") &
+        str_detect(words, "u")]
+```
+
+<span style="color:blue">d.What word has the highest number of vowels? What word has the highest proportion of vowels?(Hint what is the denominator) </span>
+
+```{r}
+vowels<- str_count(words, "[aeiou]") / str_length(words)
+words[which(vowels == max(vowels))]
+```
+Out of the words dataset in stringr it states that the word with the highest number of vowels is a. 
+
+ 
+##Tools: Extract Matches {.tabset}
+<span style="color:blue">1. In the previous example, you might have noticed that the regular expression matched flickered, which is not a color. Modify the regex to fix the problem. </span>
+
+<span style="color:green">This was the previous expression:
+```{r}
+colors <- c("red", "orange", "yellow", "green", "blue", "purple")
+color_match <- str_c(colors, collapse = "|")
+sentence<- sentences[str_count(sentences,color_match)>1]
+sentence
+```
+
+The word flickered because it has the color red embedded in the word. 
+
+```{r}
+colors <- c("red", "orange", "yellow", "green", "blue", "purple")
+color_match<- str_c("\\b(", str_c(colors, collapse = "|"), ")\\b")
+sent<- sentences[str_count(sentences,color_match)>1]
+sent
+```
+<span style="color:blue">2.From the Harvard sentence data, extract: </span>
+<span style="color:blue">a.The first word from each sentence</span>
+
+```{r}
+str_extract(sentences, "[a-zA-X]+") %>% head()
+```
+
+<span style="color:blue">b. All words ending in -ing </span>
+```{r}
+pattern <- "\\b[A-Za-z]+ing\\b"
+ing_sentence <- str_detect(sentences, pattern)
+unique(unlist(str_extract_all(sentences[ing_sentence], pattern))) %>%
+  head()
+```
+<span style="color:blue">c. All plurals </span>
+```{r}
+unique(unlist(str_extract_all(sentences, "\\b[A-Za-z]{3,}s\\b"))) %>%
+  head()
+```
+
+##Tools: Grouped Matches {.tabset}
+<span style="color:blue">1.Find all words that come after a "number" line "one" "two", "three", etc. Pull out both the number and the word. </span>
+```{r}
+num<- "(one|two|three|four|five|six|seven|eight|nine|ten) +(\\S+)"
+sentences[str_detect(sentences, num)] %>%
+  str_extract(num)
+```
+
+<span style="color:blue">2.Find all contractions. Separate out the pieces before and after the apostrophe. </span>
+```{r}
+contraction <- "([A-Za-z]+)'([A-Za-z]+)"
+sentences %>%
+  `[`(str_detect(sentences, contraction)) %>%
+  str_extract(contraction)
+```
+
+##Tools: Replacing Matches {.tabset}
+<span style="color:blue">1. Replace all forward slashes in a string with backslashes </span>
+```{r}
+backslash <- str_replace_all("Desktop/vespinoza/Desktop/ENVE207", "\\/", "\\\\")
+writeLines(backslash)
+```
+
+<span style="color:blue">2. Implement a simple version of str_to_lower() using replace_all() </span>
+```{r}
+word<- c("HELLO")
+lowercase <-str_replace_all(word, c("A"="a", "B"="b", "C"="c", "D"="d", "E"="e", "F"="f", "G"="g", "H"="h", "I"="i", "J"="j", "K"="k", "L"="l", "M"="m", "N"="n", "O"="o", "P"="p", "Q"="q", "R"="r", "S"="s", "T"="t", "U"="u", "V"="v", "W"="w", "X"="x", "Y"="y", "Z"="z"))
+lowercase
+```
+<span style="color:blue">3. Switch the first and last letters in words. Whcih of those strings are still words? </span>
+```{r}
+switch <- str_replace_all(words, "^([A-Za-z])(.*)([a-z])$", "\\3\\2\\1")
+still_words <-intersect(switch,words)
+still_words
+```
+45 words still remain words after swapping the first and last letters of words. 
+
+##Tools: Splitting
+<span style="color:blue">1.Split up a string like "apples, pears, and bananas" into individual components.</span>
+```{r}
+x <- c("apples, pears, and bananas")
+str_split(x, ", +(and +)?")[[1]]
+```
+
+<span style="color:blue">2.Why is it better to split up by boundary("word") than " "? </span>
+Splitting on boundary("word") splits on both white space and punctuation.
+
+<span style="color:blue">3.What does splitting with an empty string ("") do? Experiment, and then read the documentation. </span>
+```{r}
+str_split("Vi. ck|y", "")[[1]]
+```
+It splits the string into individual characters. 
+
+##Other Types of Patterns {.tabset}
+<span style="color:blue">1.How would you find all strings containing \ with regex() versus with fixed () ? </span>
+```{r}
+str_subset(c("da\\ta", "data", "data\\sets"), "\\\\")
+str_subset(c("da\\ta", "data", "data\\sets"), fixed("\\"))
+```
+
+<span style="color:blue">What are the five most common words in sentences? </span>
+
+```{r}
+library(stringr)
+str_extract_all(sentences, boundary("word")) %>%
+  unlist() %>%
+  str_to_lower() %>%
+  tibble() %>%
+  set_names("word") %>%
+  group_by(word) %>%
+  count(sort = TRUE) %>%
+  head(5)
+```
+The five most common words in sentences are: 1. the, 2. a, 3. of, 4. to, 5. and
+
+##stringi {.tabset}
+<span style="color:blue">1. Find the stringi functions that: </span>
+
+<span style="color:blue">a. Count the number of words </span>
+stri_count_words 
+
+<span style="color:blue">b. Find duplicated strings </span>
+stri_duplicated 
+
+<span style="color:blue">c.Generate random text </span>
+stri_rand_
+stri_rand_strings (generates random strings)
+
+##Air Quality Data Analysis {.tabset}
+<span style="color:blue">2. What class is o3.filelist? What does it contain?> </span>
+
+o3.filelist is class "list" and contains tibbles (dataframes) compiled from the .txt files 
+
+
+<span style="color:blue">3. Using ~ 1 sentence per line in the above code, explain what each line in the code is doing. </span>
+
+o3.filenames <- list.files(pattern = ".txt") <span style="color:green"> In element o3.filenames store a vector of the names of files located in the specified directory using ".txt" pattern to find the names of the files </span> 
+
+o3.filelist <- lapply(o3.filenames, read_delim, delim = "|") <span style="color:green"> In element o3.filelist store the information delimited by a "|" that is located in each of the text files with the filenames located in o3.filenames as tibbles. </span>
+
+names(o3.filelist) <- gsub(".txt","", o3.filenames)  <span style="color:green"> Replacing the name of the o3.filelist  ".txt" portion of the o3.filenames with " ". Where o3.filenames are what are being sought. </span>
+
+<span style="color:blue"> 4. Rewrite the code above using the stringr package instead of grep{base}.</span>
+
+names(o3.filelist) <- str_replace_all(o3.filenames,".txt", "")
+
+<span style="color:blue"> 5.Rewrite the code above using traditional object-based R programming instead of the piping operator.</span>
+
+
+binding <- rbindlist(o3.filelist)
+group <- group_by(binding,site = as.factor(site), date)
+sum_o3_other <- summarize(group,o3 = mean(obs, na.rm = TRUE))
+sum_o3_other
+identical(sum_o3_other,daily)
+
+
+<span style="color:blue"> 6. Summarize the o3 data above by site and by month and by year using a piping operator (the monthly mean o3 for each site for each year).</span>
+
+
+monthly <- o3.filelist %>%
+  rbindlist() %>%
+  group_by(site = as.factor(site), year(date), month(date)) %>%
+  summarize(o3 = mean(obs, na.rm = TRUE))
+monthly
+
+
+<span style="color:blue">7. Challenge! Ozone pollution actually follows a very strong diurnal pattern. How would you summarize the daily data from above in a better way to capture that diurnal pattern?</span>
+
+hourly<- o3.filelist %>%
+  rbindlist() %>%
+  group_by(site = as.factor(site), start_hour, year(date)) %>%
+  summarize(o3 = mean(obs, na.rm = TRUE))
+#head(hourly)
+ggplot(data= hourly)+
+  geom_point(mapping=aes(x=start_hour,y=o3))
+
+
+<span style="color:blue">8. How many site names in the CA air quality location dataset "Site Name" contain "San" or "Santa?".</span>
+
+#this one does not take into account embedded duplicates whereas the second code addresses this via the collapse
+san_sum <- sum(str_count(loc$'Site Name',"San"))
+santa_sum <- sum(str_count(loc$'Site Name',"Santa"))
+total <- sum(santa_sum,san_sum)
+total
+
+#or 
+x <- c("San", "Santa")
+name_match <- str_c(x,collapse = "|")
+name_subset <- str_subset(loc$`Site Name`,name_match)
+count_names <- str_count(name_subset,name_match)
+sum(count_names)
+
+
+<span style="color:blue">9. Identify the number of sites that do not have a complete address (full street address and zip code).</span> 
+
+The total number of sites that do not have a complete address and zip code are 262
+
+sum(duplicated(loc$Location)) #this is to confirm that Locations are not duplicated 
+df <- tibble(
+  address=loc$Address, Zip=loc$`Zip Code`
+)
+sum(is.na(df))
+
+
+<span style="color:blue">10. How does a semi join differ from an inner join?</span>
+A semi join is different from an inner join in that the inner join will return one row of x for each matching row of y, whereas the semi join will never duplicate rows of x.
+
+<span style="color:blue">11. Write a function to calculate the annual mean, median, max and min of all sites that have "San" or "Santa" in their name.</span>
+
+#Need to extract all the rows that have data for San and Santa 
+
+I was able to get a result for this, but rerunning the code was not functioning. I will have to go back and debug. Here is my attempt. 
+
+library(data.table)
+library(tidyverse)
+
+site.summary <- function(x,y,z){
+  yearly <- x %>%
+    group_by(site = as.factor(site))%>%
+    mutate(year = format(date, "%Y")) %>%
+    group_by(site,year) %>%
+    c <- c(y, z)
+  name_match <- str_c(c,collapse = "|")
+  d <- str_subset(loc$`Site Name`,name_match)
+  San <- subset(yearly, yearly$`Site Name`== d )%>%
+    group_by(site,year )%>%
+    summarize(mean=mean(o3, na.rm=TRUE),median=median(o3, na.rm = TRUE),max=max(o3, na.rm=TRUE),min=min(o3, na.rm=TRUE))
+  San
+}
+site.mean(daily.site,"San","Santa")
+
+
+
+<span style="color:blue">12. Write a function to caculate the annual daily mean. Apply that function to Merced County. What is the annual daily mean of o3 for Merced County?</span>
+I was able to get a result for this, but rerunning the code was not functioning. I will have to go back and debug. Here is my attempt. 
+
+library(data.table)
+library(tidyverse)
+site.mean <- function(x){
+  x <- c("Merced")
+  name_match <- str_c(x,collapse = "|")
+  name_subset <- str_subset(loc$`Site Name`,name_match)
+  merceddata <- subset(daily.site, daily.site$`Site Name`== name_subset)
+  mean=mean(x, na.rm=TRUE)
+}
+site.mean(merceddata$o3)
+mean
+
+
+
+
+
+
+
+
+
+
+  
+

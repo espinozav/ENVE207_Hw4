@@ -1,0 +1,101 @@
+---
+title: "Comments for V. Espinoza HW-4 ES207"
+author: Cininta Pertiwi
+output: html_notebook
+---
+
+#### **STRINGS**
+
+##### *String Basics number 6*
+
+* The calling of the packages could be inside the function with `require()` instead of outside the function. That way when the function used it will call the package on its own.
+* When a vector length is 2, example `c("a", "b")` this results in `a, and b`, maybe another layer in the function for if `length(x) == 2` could be specified so that the separator for a vector length of 2 is "and".
+
+##### *Other*
+
+* I think you did a great job Vicky! I learned from your code, especially the ones that I was struggling with to finish (Tools: Grouped & Splitting; Count most words used in sentences). I also think the codes and functions you used were simpler and there were some functions I didn't know about. An example is `intersect()` that was used in Replacing Matches numer 3. Thank you! :)
+
+#### **AIR QUALITY DATA**
+
+##### *Number 8*
+For the code below, I think you could also use piping or make it into a function, maybe?
+```{r eval = FALSE}
+# code not run
+
+x <- c("San", "Santa")
+name_match <- str_c(x,collapse = "|")
+name_subset <- str_subset(loc$`Site Name`,name_match)
+count_names <- str_count(name_subset,name_match)
+sum(count_names)
+```
+
+##### *Number 9*
+The code you had (in chunk below), does this only count the missing addresses and/or zip codes? There were also values of adresses and zip codes that were not missing but did not give a complete searchable address and I was wondering if this code would also account for those.
+```{r eval = FALSE}
+# code not run
+
+sum(duplicated(loc$Location)) #this is to confirm that Locations are not duplicated 
+df <- tibble(
+  address=loc$Address, Zip=loc$`Zip Code`
+)
+sum(is.na(df))
+```
+
+##### *Number 11*
+You mentioned that you were not able to rerun the code. I didn't run it either but took a look at it. I made minor comments that would maybe be helpful to get the code rerunning.
+```{r eval = FALSE}
+# code not run
+
+library(data.table) # This can be put into the function with 'require()'
+library(tidyverse)
+
+site.summary <- function(x,y,z){
+  
+  yearly <- x %>%
+    group_by(site = as.factor(site))%>%
+    mutate(year = format(date, "%Y")) %>%
+    group_by(site,year) %>% # I'm not sure if it's possible to pipe into the newly defined c variable; Was this pipe sign supposed to be here?
+    c <- c(y, z)
+    
+  name_match <- str_c(c,collapse = "|")
+  d <- str_subset(loc$`Site Name`,name_match)
+  
+  San <- subset(yearly, yearly$`Site Name`== d )%>%
+    group_by(site,year )%>%
+    summarize(mean=mean(o3, na.rm=TRUE),median=median(o3, na.rm = TRUE),max=max(o3, na.rm=TRUE),min=min(o3, na.rm=TRUE))
+  
+  San # The function needs to return something; If you meant to return 'San' it probably should be 'return(San)'
+}
+site.mean(daily.site,"San","Santa")
+```
+
+##### *Number 12*
+Similar to number 11, I didn't run the code but took a look at it. I made minor comments that would maybe be helpful to get the code rerunning.
+```{r eval = FALSE}
+# code not run
+
+library(data.table) # This can be put into the function with 'require()'
+library(tidyverse)
+
+site.mean <- function(x){
+  
+  x <- c("Merced") # Maybe piping operations might be possible for this?
+  name_match <- str_c(x,collapse = "|")
+  name_subset <- str_subset(loc$`Site Name`,name_match)
+  merceddata <- subset(daily.site, daily.site$`Site Name`== name_subset)
+  mean=mean(x, na.rm=TRUE)
+  
+  # The function needs to return something. Is the function returning merceddata or mean? I don't think functions can return two things.
+}
+site.mean(merceddata$o3)
+mean # Is this mean variable same as what was defined in the function? I'm not sure how this plays out because isn't the 'mean' variable inside the function a local variable?
+```
+
+
+#### **OTHER**
+
+* I'm not sure if this was just on my side or whether it was intentional, but when I opened the .html file, a lot of the code were not in the chunks format. I also opened the .Rmd file to check it and the code was there, but in some parts it was not contained within the chunk format. I would have to manually put them in a chunk to be able to run them.
+* Due to this, especially for the air quality data analysis part, since the code was not in the chunks, the outputs were not displayed in the .html file and I would need to run it in the .Rmd file to see the output.
+
+  
+  
